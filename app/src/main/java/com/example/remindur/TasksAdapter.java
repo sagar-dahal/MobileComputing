@@ -1,51 +1,97 @@
 package com.example.remindur;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> {
 
-    private List<TasksModel> tasksList;
-    private MainActivity mainActivity;
+    private List<TasksModel> taskList;
+    private DatabaseHandler db;
+    private MainActivity activity;
 
-    public TasksAdapter(MainActivity mainActivity){
-        this.mainActivity = mainActivity;
+    public TasksAdapter(DatabaseHandler db, MainActivity activity) {
+        this.db = db;
+        this.activity = activity;
     }
 
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.task_layout, parent, false);
         return new ViewHolder(itemView);
     }
 
-    public void onBindViewHolder(ViewHolder holder, int position){
-        TasksModel item = tasksList.get(position);
+    @Override
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+        db.openDatabase();
+
+        final TasksModel item = taskList.get(position);
         holder.task.setText(item.getTask());
         holder.task.setChecked(toBoolean(item.getStatus()));
+        holder.task.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    db.updateStatus(item.getId(), 1);
+                } else {
+                    db.updateStatus(item.getId(), 0);
+                }
+            }
+        });
     }
 
-    public int getItemCount(){
-        return tasksList.size();
+    private boolean toBoolean(int n) {
+        return n != 0;
     }
 
-    private boolean toBoolean(int n){
-        return n!=0;
+    @Override
+    public int getItemCount() {
+        return taskList.size();
     }
 
-    public void setTasks(List<TasksModel> tasksList){
-        this.tasksList = tasksList;
+    public Context getContext() {
+        return activity;
+    }
+
+    public void setTasks(List<TasksModel> taskList) {
+        this.taskList = taskList;
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public void deleteItem(int position) {
+        TasksModel item = taskList.get(position);
+        db.deleteTask(item.getId());
+        taskList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void editItem(int position) {
+        TasksModel item = taskList.get(position);
+        Bundle bundle = new Bundle();
+        bundle.putInt("id", item.getId());
+        bundle.putString("task", item.getTask());
+        AddNewTask fragment = new AddNewTask();
+        fragment.setArguments(bundle);
+        fragment.show(activity.getSupportFragmentManager(), AddNewTask.TAG);
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         CheckBox task;
-        ViewHolder(View view){
+
+        ViewHolder(View view) {
             super(view);
             task = view.findViewById(R.id.todoCheckBox);
         }
