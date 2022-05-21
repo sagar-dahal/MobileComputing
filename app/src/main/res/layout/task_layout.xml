@@ -15,12 +15,18 @@
 
         <CheckBox
             android:id="@+id/todoCheckBox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:paddingStart="8dp"
             android:buttonTint="@android:color/holo_green_dark"
-            tools:text="Sample Task"/>
+            android:text="Dummy task"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dueDate"
+            android:layout_below="@id/todoCheckBox"
+            tools:text="Heyyyy" />
 
     </RelativeLayout>
 

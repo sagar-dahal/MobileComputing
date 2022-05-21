@@ -6,11 +6,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -19,6 +21,8 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 public class AddNewTask extends BottomSheetDialogFragment {
@@ -26,6 +30,9 @@ public class AddNewTask extends BottomSheetDialogFragment {
     public static final String TAG = "ActionBottomDialog";
     private EditText newTaskText;
     private Button newTaskSaveButton;
+    private CalendarView calendarView;
+    private String dueDate;
+    private Calendar calendar;
 
     private DatabaseHandler db;
 
@@ -55,6 +62,8 @@ public class AddNewTask extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
         newTaskText = requireView().findViewById(R.id.newTaskText);
         newTaskSaveButton = getView().findViewById(R.id.newTaskButton);
+        calendarView = getView().findViewById(R.id.calendarView);
+        calendar = Calendar.getInstance();
 
         boolean isUpdate = false;
 
@@ -93,6 +102,12 @@ public class AddNewTask extends BottomSheetDialogFragment {
             }
         });
 
+        calendarView.setOnDateChangeListener((calendarView, year, month, dayOfMonth) -> {
+            calendar.clear();
+            calendar.set(year, month, dayOfMonth);
+            dueDate = String.valueOf(calendar.getTime());
+        });
+
         final boolean finalIsUpdate = isUpdate;
         newTaskSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,6 +120,7 @@ public class AddNewTask extends BottomSheetDialogFragment {
                     TasksModel task = new TasksModel();
                     task.setTask(text);
                     task.setStatus(0);
+                    task.setDate(dueDate);
                     db.insertTask(task);
                 }
                 dismiss();

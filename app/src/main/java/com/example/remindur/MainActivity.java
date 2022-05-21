@@ -7,11 +7,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -24,12 +26,15 @@ public class MainActivity extends AppCompatActivity implements DialogCloseListen
 
     private List<TasksModel> taskList;
     private DatabaseHandler db;
+    private static final String TAG = "MyActivity";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Objects.requireNonNull(getSupportActionBar()).hide();
+
 
         db = new DatabaseHandler(this);
         db.openDatabase();
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements DialogCloseListen
             @Override
             public void onClick(View v) {
                 AddNewTask.newInstance().show(getSupportFragmentManager(), AddNewTask.TAG);
+                //Log.i(TAG, ">>>>>>>>>>>" + String.valueOf(Calendar.getInstance().getTime()));
             }
         });
     }
